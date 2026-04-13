@@ -1,14 +1,14 @@
-# macOS
+# MACOS
 .DS_Store
-# Windows
+# WINDOWS
 Thumbs.db
-# Node
+# NODE
 node_modules/
 npm-debug.log*
-# Environment vars (dont commit these)
+# ENVIORNMENT VARIABLES (dont commit these)
 .env
 .env.local
-# Build output
+# BUILD OUTPUT
 dist/
 build/
 # IDE
