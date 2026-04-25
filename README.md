@@ -18,6 +18,8 @@ A full-stack web application that helps University of Pittsburgh students track 
 ---
 
 ## Project Structure
+
+```
 CS1530-PROJECT/
 ├── frontend/
 │   ├── src/
@@ -37,6 +39,7 @@ CS1530-PROJECT/
 │   ├── schema.sql        (PostgreSQL schema)
 │   └── migrate.js        (migration script)
 └── README.md
+```
 
 ## Setup & Installation
 
@@ -58,12 +61,12 @@ npm install
 ```
 
 Create a `.env` file in the `backend/` folder:
-
+```
 PORT=3000
 JWT_SECRET=your-secret-here
 JWT_EXPIRES_IN=1h
 DATABASE_URL=your-postgresql-connection-string
-
+```
 ### 3. Run database migrations
 ```bash
 cd db
