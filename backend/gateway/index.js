@@ -1,5 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const pool = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -92,5 +93,14 @@ app.get('/goals', requireAuth, (req, res) =>
     data: [],
   })
 );
+
+app.get('/db-ping', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT NOW()');
+    res.status(200).json({ connected: true, time: result.rows[0].now });
+  } catch (err) {
+    res.status(500).json({ connected: false, error: err.message });
+  }
+});
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
