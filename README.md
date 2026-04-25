@@ -16,6 +16,74 @@ A full-stack web application that helps University of Pittsburgh students track 
 | Version Control | GitHub |
 
 ---
+## Features
+
+### Backend — API Gateway
+**GET /ping**
+A health check endpoint that confirms the server is running. Returns `{ "message": "pong" }` with a 200 status. No authentication required.
+
+**Pitt SSO Authentication**
+Stubs out the Pitt SSO login flow. Hit `/auth/pitt/login` to get a mock login URL, then `/auth/pitt/callback?code=mock-auth-code` to receive a JWT token for use in authenticated requests.
+
+**JWT Authentication Middleware**
+Protects routes by validating Bearer tokens on every request. Returns 401 if the token is missing or invalid.
+
+**Input Validation Middleware**
+Validates that required fields are present in request bodies before processing. Returns 400 with a list of missing fields if validation fails.
+
+**POST /goals**
+Creates a new health goal for the authenticated user. Requires a valid JWT Bearer token and a request body with `type` and `target` fields. Returns 201 on success.
+
+**GET /goals**
+Retrieves all goals for the authenticated user. Requires a valid JWT Bearer token.
+
+**GET /db-ping**
+Verifies the backend is successfully connected to the PostgreSQL database. Returns the current server time if connected.
+
+**Global Error Handler**
+Catches any unhandled errors across the application and returns a clean 500 response instead of crashing the server.
+
+---
+
+### Backend — Workout & Meal Tracking
+**POST /workouts**
+Logs a new workout entry for the authenticated user. Connects to PostgreSQL and returns 201 on success.
+
+**GET /workouts**
+Retrieves all workout entries for the authenticated user from the database.
+
+**POST /meals**
+Logs a new meal entry for the authenticated user. Connects to PostgreSQL and returns 201 on success.
+
+**GET /meals**
+Retrieves all meal entries for the authenticated user from the database.
+
+---
+
+### Database
+**PostgreSQL Schema**
+Defines tables for Student, WorkoutEntry, MealEntry, Goal, and HealthLog. Run `node db/migrate.js` to apply the schema to your database.
+
+**Database Connection Pool**
+Manages PostgreSQL connections efficiently using a connection pool, shared across all backend services.
+
+---
+
+### Frontend
+**Login Page**
+Allows students to log in via Pitt SSO stub. Stores a JWT token in localStorage on successful login and redirects to the dashboard.
+
+**Dashboard**
+Main landing page after login. Shows an overview of the student's health tracking activity. Protected route — redirects to login if not authenticated.
+
+**Workout Log Form**
+Form for logging a new workout entry. Protected route — requires authentication to access.
+
+**Protected Routes**
+Any route that requires authentication automatically redirects unauthenticated users to the login page.
+
+**React Router Navigation**
+Client-side routing between Login, Dashboard, and Workout Log pages without full page reloads.
 
 ## Project Structure
 
