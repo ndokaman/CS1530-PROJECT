@@ -12,6 +12,20 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev-only-secret-change-me';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
 
 app.use(express.json());
+// Input validation middleware
+// Checks that all required fields are present in the request body
+function validateBody(requiredFields) {
+  return (req, res, next) => {
+    const missing = requiredFields.filter(field => !req.body[field]);
+    if (missing.length > 0) {
+      return res.status(400).json({
+        message: 'Missing required fields',
+        missing,
+      });
+    }
+    next();
+  };
+}
 
 app.get('/ping', (req, res) => {
   res.status(200).json({ message: 'pong' });
@@ -94,4 +108,17 @@ app.get('/db-ping', async (req, res) => {
   }
 });
 
+// POST /goals - Create a new goal (requires auth and validation)
+app.post('/goals', requireAuth, validateBody(['type', 'target']), (req, res) =>
+  res.status(201).json({
+    message: 'Goal created',
+    data: req.body,
+  })
+);
+
+// Global error handler - catches any unhandled errors in the app
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: 'Internal server error' });
+});
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
