@@ -1,6 +1,10 @@
+require('dotenv').config();
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const pool = require('./db');
+
+const workoutsRouter = require('../workouts/routes');
+const mealsRouter = require('../meals/routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,8 +27,6 @@ app.get('/auth', (req, res) => {
 
 app.get('/auth/pitt/login', (req, res) => {
   const redirectUri = req.query.redirect_uri || '/auth/pitt/callback';
-
-  // Stub only: in a real flow this would redirect to Pitt SSO.
   res.status(200).json({
     message: 'Pitt SSO login stub',
     next: 'Call callback endpoint with a code to simulate SSO success',
@@ -72,20 +74,9 @@ function requireAuth(req, res, next) {
   }
 }
 
-app.get('/workouts', requireAuth, (req, res) =>
-  res.status(200).json({
-    message: 'Authenticated workouts route',
-    user: req.user,
-    data: [],
-  })
-);
-app.get('/meals', requireAuth, (req, res) =>
-  res.status(200).json({
-    message: 'Authenticated meals route',
-    user: req.user,
-    data: [],
-  })
-);
+app.use('/workouts', requireAuth, workoutsRouter);
+app.use('/meals', requireAuth, mealsRouter);
+
 app.get('/goals', requireAuth, (req, res) =>
   res.status(200).json({
     message: 'Authenticated goals route',
