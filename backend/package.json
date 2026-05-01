@@ -4,7 +4,7 @@
   "main": "gateway/index.js",
   "scripts": {
     "start": "node gateway/index.js",
-    "test": "jest"
+    "test": "jest --no-watchman"
   },
   "dependencies": {
     "dotenv": "^17.4.2",
@@ -15,6 +15,6 @@
   "devDependencies": {
     "jest": "^29.7.0",
     "pg-mem": "^3.0.14",
-    "supertest": "^7.0.0"
+    "supertest": "^7.2.2"
   }
 }
