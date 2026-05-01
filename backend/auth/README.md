@@ -1,4 +1,4 @@
-# Auth Service — JWT + Pitt SSO Stub (Owner: Tanishq)
+# Auth Service — JWT + Pitt SSO Stub (Owner: Tanishq) 
 
 This module documents the authentication behavior currently implemented in the API gateway.
 It uses a Pitt SSO-compatible stub flow for development and issues JWTs for protected routes.
