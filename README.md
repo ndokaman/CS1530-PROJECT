@@ -192,6 +192,14 @@ cd frontend
 npm install
 ```
 
+### Testing
+
+Backend tests use Jest and Supertest for API endpoint testing.
+---
+
+bashcd backend
+npx jest
+
 ---
 
 ## Running the Application
