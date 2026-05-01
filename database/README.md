@@ -1,1 +1,1 @@
-# Database — SQL schema + migrations (owner: Daniel) 
+# Database — SQL schema + migrations (owner: Daniel)  
