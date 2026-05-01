@@ -151,10 +151,20 @@ app.get('/goals', requireAuth, (req, res) =>
 );
 
 app.get('/db-ping', async (req, res) => {
+  const TIMEOUT_MS = 5000;
+  const timeout = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('db_timeout')), TIMEOUT_MS)
+  );
   try {
-    const result = await pool.query('SELECT NOW()');
+    const result = await Promise.race([pool.query('SELECT NOW()'), timeout]);
     res.status(200).json({ connected: true, time: result.rows[0].now });
   } catch (err) {
+    if (err.message === 'db_timeout') {
+      return res.status(503).json({
+        connected: false,
+        error: 'Database connection timed out — Render may be cold-starting. Retry in a few seconds.',
+      });
+    }
     res.status(500).json({ connected: false, error: err.message });
   }
 });

@@ -65,7 +65,7 @@ Retrieves all meal entries for the authenticated user from the database.
 Defines tables for Student, WorkoutEntry, MealEntry, Goal, and HealthLog. Run `node db/migrate.js` to apply the schema to your database.
 
 **Database Connection Pool**
-Manages PostgreSQL connections efficiently using a connection pool, shared across all backend services.
+Manages PostgreSQL connections efficiently using a connection pool (5 s connection timeout, 30 s idle timeout), shared across all backend services.
 
 ---
 
@@ -141,6 +141,50 @@ cd db
 npm install
 node migrate.js
 ```
+
+The migration applies `db/schema.sql`, which creates the following tables (safe to re-run — uses `CREATE TABLE IF NOT EXISTS`):
+
+```
+┌─────────────────────────────────┐
+│            Student              │
+├─────────────────────────────────┤
+│ id              SERIAL  PK      │
+│ pitt_username   VARCHAR UNIQUE  │
+│ email           VARCHAR UNIQUE  │
+│ display_name    VARCHAR         │
+│ created_at      TIMESTAMP       │
+└──────────────┬──────────────────┘
+               │ student_id (FK)
+       ┌───────┴────────────────────────────────────┐
+       │                                            │
+┌──────▼──────────────────────┐   ┌────────────────▼────────────────┐
+│        WorkoutEntry         │   │           MealEntry              │
+├─────────────────────────────┤   ├─────────────────────────────────┤
+│ id              SERIAL  PK  │   │ id              SERIAL  PK      │
+│ student_id      INT     FK  │   │ student_id      INT     FK      │
+│ workout_type    VARCHAR      │   │ meal_name       VARCHAR         │
+│ duration_minutes INT         │   │ calories        INT             │
+│ calories_burned INT          │   │ protein_g       DECIMAL(6,2)    │
+│ notes           TEXT         │   │ carbs_g         DECIMAL(6,2)    │
+│ logged_at       TIMESTAMP   │   │ fat_g           DECIMAL(6,2)    │
+└─────────────────────────────┘   │ logged_at       TIMESTAMP       │
+                                  └─────────────────────────────────┘
+
+┌──────────────────────────────┐   ┌─────────────────────────────────┐
+│            Goal              │   │           HealthLog              │
+├──────────────────────────────┤   ├─────────────────────────────────┤
+│ id              SERIAL  PK   │   │ id              SERIAL  PK      │
+│ student_id      INT     FK   │   │ student_id      INT     FK      │
+│ goal_type       VARCHAR      │   │ log_date        DATE            │
+│ target_value    DECIMAL(8,2) │   │ weight_lbs      DECIMAL(5,2)    │
+│ target_date     DATE         │   │ sleep_hours     DECIMAL(4,2)    │
+│ is_achieved     BOOLEAN      │   │ water_oz        INT             │
+│ created_at      TIMESTAMP    │   │ mood_score      INT (1–5)       │
+└──────────────────────────────┘   │ created_at      TIMESTAMP       │
+                                   └─────────────────────────────────┘
+```
+
+> All child tables reference `Student.id` with `ON DELETE CASCADE` — deleting a student removes all their associated records.
 
 ### 4. Set up the frontend
 ```bash
