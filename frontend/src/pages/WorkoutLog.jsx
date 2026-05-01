@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { api } from '../lib/api.js';
 
 const WORKOUT_TYPES = [
   'Strength',
@@ -28,6 +29,8 @@ export default function WorkoutLog() {
   });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [saving, setSaving] = useState(false);
 
   function update(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -52,22 +55,30 @@ export default function WorkoutLog() {
     return Object.keys(next).length === 0;
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setSubmitted(false);
+    setSubmitError('');
     if (!validate()) return;
 
-    // Backend POST /workouts isn't wired yet; log to console for now so
-    // the form can be exercised end-to-end in the UI.
     const payload = {
       ...form,
       duration: Number(form.duration),
       calories: form.calories ? Number(form.calories) : null,
     };
-    console.log('Submitting workout:', payload);
 
-    setSubmitted(true);
-    setTimeout(() => navigate('/dashboard'), 800);
+    setSaving(true);
+    try {
+      await api.post('/workouts', payload);
+      setSubmitted(true);
+      setTimeout(() => navigate('/dashboard'), 800);
+    } catch (err) {
+      setSubmitError(
+        err.message || 'Failed to save workout. Is the backend running?'
+      );
+    } finally {
+      setSaving(false);
+    }
   }
 
   const inputBase =
@@ -217,6 +228,11 @@ export default function WorkoutLog() {
             Workout saved. Redirecting…
           </div>
         )}
+        {submitError && (
+          <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+            {submitError}
+          </div>
+        )}
 
         <div className="flex items-center justify-end gap-2 pt-2">
           <button
@@ -228,9 +244,10 @@ export default function WorkoutLog() {
           </button>
           <button
             type="submit"
-            className="px-4 py-2 text-sm rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700"
+            disabled={saving}
+            className="px-4 py-2 text-sm rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:bg-blue-400"
           >
-            Save workout
+            {saving ? 'Saving…' : 'Save workout'}
           </button>
         </div>
       </form>

@@ -3,13 +3,19 @@ const WorkoutService = require('./service');
 
 const router = express.Router();
 
-// GET /workouts — preserves existing stub behavior
-router.get('/', (req, res) => {
-  res.status(200).json({
-    message: 'Authenticated workouts route',
-    user: req.user,
-    data: [],
-  });
+// GET /workouts — return the authenticated user's workouts from the DB.
+router.get('/', async (req, res) => {
+  try {
+    const data = await WorkoutService.listForUser(req.user.sub);
+    return res.status(200).json({
+      message: 'Authenticated workouts route',
+      user: req.user,
+      data,
+    });
+  } catch (err) {
+    console.error('Failed to list workouts:', err);
+    return res.status(500).json({ message: 'Failed to list workouts' });
+  }
 });
 
 // POST /workouts — create a new workout entry

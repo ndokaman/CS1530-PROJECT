@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { setSession } from '../lib/auth.js';
+import { api } from '../lib/api.js';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -23,27 +24,26 @@ export default function Login() {
 
     setLoading(true);
     try {
-      // Placeholder auth flow: stubs a token + user locally so the app
-      // can be exercised without the backend running yet. This will be
-      // swapped for Pitt SSO callback handling once wired in.
-      await new Promise((r) => setTimeout(r, 300));
-
-      const user = {
-        username,
-        email: `${username}@pitt.edu`,
-        provider: 'dev-stub',
-      };
-      setSession('dev-token', user);
+      // Calls the real backend SSO callback stub. The username is passed
+      // through so the backend can upsert a distinct student row per user.
+      // Password isn't validated by the stub yet.
+      const url = `/auth/pitt/callback?code=mock-auth-code&username=${encodeURIComponent(
+        username.trim()
+      )}`;
+      const result = await api.get(url, { auth: false });
+      setSession(result.accessToken, result.user);
       navigate(from, { replace: true });
     } catch (err) {
-      setError('Login failed. Please try again.');
+      setError(
+        err.message ||
+          'Login failed. Make sure the backend is running on port 3000.'
+      );
     } finally {
       setLoading(false);
     }
   }
 
   function handlePittSso() {
-    // Redirect to the backend stub; in the real flow this would bounce to Pitt SSO.
     window.location.href = '/auth/pitt/login';
   }
 

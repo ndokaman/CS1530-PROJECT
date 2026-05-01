@@ -12,6 +12,17 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev-only-secret-change-me';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
 
 app.use(express.json());
+
+// Request logger so each call is visible in the backend terminal during demos.
+app.use((req, res, next) => {
+  const started = Date.now();
+  res.on('finish', () => {
+    const ms = Date.now() - started;
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl} -> ${res.statusCode} (${ms}ms)`);
+  });
+  next();
+});
+
 // Input validation middleware
 // Checks that all required fields are present in the request body
 function validateBody(requiredFields) {
@@ -50,18 +61,45 @@ app.get('/auth/pitt/login', (req, res) => {
   });
 });
 
-app.get('/auth/pitt/callback', (req, res) => {
-  const { code } = req.query;
+app.get('/auth/pitt/callback', async (req, res) => {
+  const { code, username } = req.query;
   if (!code) {
     return res.status(400).json({ message: 'Missing SSO code' });
   }
 
+  // Derive a stable `sub` per username so each unique login = a distinct
+  // student row. Falls back to the original hardcoded student when no
+  // username is provided (preserves the original stub behavior).
+  const cleanUsername = (username || 'pitt.student').toString().trim().toLowerCase();
+  const sub = username ? `pitt-${cleanUsername}` : 'pitt-user-12345';
+
   const user = {
-    sub: 'pitt-user-12345',
-    username: 'pitt.student',
-    email: 'pitt.student@pitt.edu',
+    sub,
+    username: cleanUsername,
+    email: `${cleanUsername}@pitt.edu`,
     provider: 'pitt-sso-stub',
   };
+
+  // Upsert the student row so login actually touches the database.
+  // Best-effort: if the DB upsert fails we still return the JWT so the
+  // demo isn't blocked by a transient DB error.
+  let dbRow = null;
+  try {
+    const upsert = await pool.query(
+      `INSERT INTO students (pitt_sub, username, email, provider, last_login_at)
+       VALUES ($1, $2, $3, $4, NOW())
+       ON CONFLICT (pitt_sub) DO UPDATE
+         SET username = EXCLUDED.username,
+             email = EXCLUDED.email,
+             provider = EXCLUDED.provider,
+             last_login_at = NOW()
+       RETURNING *`,
+      [user.sub, user.username, user.email, user.provider]
+    );
+    dbRow = upsert.rows[0];
+  } catch (err) {
+    console.error('[auth] failed to upsert student row:', err.message);
+  }
 
   const token = jwt.sign(user, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
   return res.status(200).json({
@@ -69,7 +107,20 @@ app.get('/auth/pitt/callback', (req, res) => {
     accessToken: token,
     tokenType: 'Bearer',
     user,
+    student: dbRow,
   });
+});
+
+// Debug endpoint to show all student rows (no auth, demo-friendly).
+app.get('/students', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, pitt_sub, username, email, provider, last_login_at, created_at FROM students ORDER BY id'
+    );
+    return res.status(200).json({ count: result.rows.length, students: result.rows });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
 });
 
 function requireAuth(req, res, next) {

@@ -21,6 +21,18 @@ const WorkoutService = {
     );
     return result.rows[0];
   },
+
+  async listForUser(userId) {
+    const result = await pool.query(
+      `SELECT id, user_id, date, type, exercise, duration, intensity,
+              calories, notes, created_at
+         FROM workouts
+        WHERE user_id = $1
+        ORDER BY date DESC, id DESC`,
+      [userId]
+    );
+    return result.rows;
+  },
 };
 
 module.exports = WorkoutService;
