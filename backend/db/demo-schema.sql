@@ -1,4 +1,4 @@
--- Demo schema used when DATABASE_URL is not configured.
+-- Demo schema used when DATABASE_URL is not configured. 
 -- Mirrors the columns the workouts/meals services actually insert into,
 -- so the in-memory Postgres (pg-mem) can satisfy POST /workouts and /meals
 -- end-to-end without a real database.
