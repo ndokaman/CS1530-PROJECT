@@ -182,4 +182,15 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ message: 'Internal server error' });
 });
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+module.exports = {
+  app,
+  requireAuth,
+  validateBody,
+  JWT_SECRET,
+  JWT_EXPIRES_IN,
+};
+
+if (require.main === module) {
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
