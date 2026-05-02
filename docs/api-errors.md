@@ -151,3 +151,9 @@ Any unhandled error that reaches the end of the middleware chain is caught by th
 ```
 
 With HTTP status **500**.
+
+## Notes
+
+- All endpoints return JSON responses
+- All authenticated endpoints require a valid JWT Bearer token in the `Authorization` header
+- The `validateBody` middleware is reusable and can be applied to any future POST endpoints
