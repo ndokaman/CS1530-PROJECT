@@ -194,7 +194,7 @@ npm install
 
 ### Testing
 
-Backend tests use Jest and Supertest for API endpoint testing.
+Backend tests use Jest and Supertest for API endpoint tting.
 ---
 
 bashcd backend
