@@ -86,8 +86,6 @@ Any route that requires authentication automatically redirects unauthenticated u
 Client-side routing between Login, Dashboard, and Workout Log pages without full page reloads.
 
 ## Project Structure
-
-```
 CS1530-PROJECT/
 ├── frontend/
 │   ├── src/
@@ -107,7 +105,6 @@ CS1530-PROJECT/
 │   ├── schema.sql        (PostgreSQL schema)
 │   └── migrate.js        (migration script)
 └── README.md
-```
 
 ## Setup & Installation
 
@@ -118,7 +115,7 @@ CS1530-PROJECT/
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/ndokaman/CS1530-PROJECT.git
+git clone https://github.com/aaravkakade/CS1530-PROJECT.git
 cd CS1530-PROJECT
 ```
 
@@ -129,12 +126,10 @@ npm install
 ```
 
 Create a `.env` file in the `backend/` folder:
-```
 PORT=3000
 JWT_SECRET=your-secret-here
 JWT_EXPIRES_IN=1h
 DATABASE_URL=your-postgresql-connection-string
-```
 ### 3. Run database migrations
 ```bash
 cd db
@@ -143,8 +138,6 @@ node migrate.js
 ```
 
 The migration applies `db/schema.sql`, which creates the following tables (safe to re-run — uses `CREATE TABLE IF NOT EXISTS`):
-
-```
 ┌─────────────────────────────────┐
 │            Student              │
 ├─────────────────────────────────┤
@@ -154,9 +147,9 @@ The migration applies `db/schema.sql`, which creates the following tables (safe 
 │ display_name    VARCHAR         │
 │ created_at      TIMESTAMP       │
 └──────────────┬──────────────────┘
-               │ student_id (FK)
-       ┌───────┴────────────────────────────────────┐
-       │                                            │
+│ student_id (FK)
+┌───────┴────────────────────────────────────┐
+│                                            │
 ┌──────▼──────────────────────┐   ┌────────────────▼────────────────┐
 │        WorkoutEntry         │   │           MealEntry              │
 ├─────────────────────────────┤   ├─────────────────────────────────┤
@@ -168,8 +161,7 @@ The migration applies `db/schema.sql`, which creates the following tables (safe 
 │ notes           TEXT         │   │ carbs_g         DECIMAL(6,2)    │
 │ logged_at       TIMESTAMP   │   │ fat_g           DECIMAL(6,2)    │
 └─────────────────────────────┘   │ logged_at       TIMESTAMP       │
-                                  └─────────────────────────────────┘
-
+└─────────────────────────────────┘
 ┌──────────────────────────────┐   ┌─────────────────────────────────┐
 │            Goal              │   │           HealthLog              │
 ├──────────────────────────────┤   ├─────────────────────────────────┤
@@ -181,8 +173,7 @@ The migration applies `db/schema.sql`, which creates the following tables (safe 
 │ is_achieved     BOOLEAN      │   │ water_oz        INT             │
 │ created_at      TIMESTAMP    │   │ mood_score      INT (1–5)       │
 └──────────────────────────────┘   │ created_at      TIMESTAMP       │
-                                   └─────────────────────────────────┘
-```
+└─────────────────────────────────┘
 
 > All child tables reference `Student.id` with `ON DELETE CASCADE` — deleting a student removes all their associated records.
 
@@ -194,11 +185,12 @@ npm install
 
 ### Testing
 
-Backend tests use Jest and Supertest for API endpoint tting.
----
+Backend tests use Jest and Supertest for API endpoint testing.
 
-bashcd backend
+```bash
+cd backend
 npx jest
+```
 
 ---
 
